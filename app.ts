@@ -1,11 +1,28 @@
 import { Blockchain } from "./chain";
 import { Transaction } from "./transaction";
+import elliptic from "elliptic";
+import { privateKey, publicKey } from "./walletgenerator";
 
-let simpleChain = new Blockchain();
-simpleChain.createTransaction(new Transaction("addr1", "addr2", 50));
-simpleChain.minePendingTransactions("patsn");
-
+const EC = elliptic.ec;
+const ec = new EC("secp256k1");
 console.clear();
+
+// Create a new instance of the Blockchain class
+const difficulty = 2;
+const miningReward = 100;
+let simpleChain = new Blockchain(difficulty, miningReward);
+
+// Create a new transaction
+const myKey = ec.keyFromPrivate(privateKey);
+const transaction1 = new Transaction(publicKey, "toAddress", 10);
+transaction1.signTransaction(myKey);
+
+// Add the transaction to the pending transactions array
+simpleChain.addTransaction(transaction1);
+
+// Mine the pending transactions
+simpleChain.minePendingTransactions("minerAddress");
+
 console.log(simpleChain);
-console.log("Balance of addr1: ", simpleChain.getBalanceOfAddress("addr1"));
-console.log("Balance of addr2: ", simpleChain.getBalanceOfAddress("addr2"));
+console.log("Is chain valid? " + simpleChain.isChainValid());
+console.log("My balance: " + simpleChain.getBalanceOfAddress(publicKey));

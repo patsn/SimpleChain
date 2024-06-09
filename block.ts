@@ -16,15 +16,27 @@ export class Block {
 		this.nonce = 0;
 	}
 
+	// Calculate the hash of the block
 	calculateHash() {
 		return SHA256(this.previousHash + this.timestamp + JSON.stringify(this.transactions) + this.nonce).toString();
 	}
 
+	// Mine the block
 	mineBlock(difficulty: number) {
 		while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
 			this.nonce++;
 			this.hash = this.calculateHash();
 		}
-		console.log("Block mined: " + this.hash);
+	}
+
+	// Check if all transactions in the block are valid
+	hasValidTransactions() {
+		for (const tx of this.transactions as Transaction[]) {
+			if (!tx.isValid()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
