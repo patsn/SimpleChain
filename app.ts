@@ -13,14 +13,11 @@ const difficulty: number = 2;
 const miningReward: number = 100;
 
 console.clear();
-console.log("Starting the blockchain...");
 
 // Create a new instance of the Blockchain class
-console.log("Creating a new instance of the Blockchain class...");
 let simpleChain = new Blockchain(difficulty, miningReward);
 
 // Create a new transaction
-console.log("Creating a new transaction...");
 const myKey = ec.keyFromPrivate(privateKey);
 
 const transaction1 = new Transaction(publicKey, "toAddress", 10);
@@ -30,15 +27,12 @@ const transaction2 = new Transaction(publicKey, "toAddress", 20);
 transaction2.signTransaction(myKey);
 
 // Add the transactions to the pending transactions array
-console.log("Adding the transactions to the pending transactions array...");
 simpleChain.addTransaction(transaction1);
 simpleChain.addTransaction(transaction2);
 
 // Mine the pending transactions
-console.log("Mining the pending transactions...");
 simpleChain.minePendingTransactions("minerAddress");
 
-console.log("Finished mining the pending transactions...");
 console.log("---------------------------------");
 console.dir(simpleChain, { depth: null });
 console.log("---------------------------------");
