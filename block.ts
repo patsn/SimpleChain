@@ -17,12 +17,12 @@ export class Block {
 	}
 
 	// Calculate the hash of the block
-	calculateHash() {
+	public calculateHash() {
 		return SHA256(this.previousHash + this.timestamp + JSON.stringify(this.transactions) + this.nonce).toString();
 	}
 
 	// Mine the block
-	mineBlock(difficulty: number) {
+	public mineBlock(difficulty: number) {
 		while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
 			this.nonce++;
 			this.hash = this.calculateHash();
@@ -30,13 +30,12 @@ export class Block {
 	}
 
 	// Check if all transactions in the block are valid
-	hasValidTransactions() {
-		for (const tx of this.transactions as Transaction[]) {
-			if (!tx.isValid()) {
+	public hasValidTransactions() {
+		for (const transaction of this.transactions as Transaction[]) {
+			if (!transaction.isValid()) {
 				return false;
 			}
 		}
-
 		return true;
 	}
 }

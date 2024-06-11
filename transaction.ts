@@ -17,23 +17,23 @@ export class Transaction {
 	}
 
 	// Calculate the hash of the transaction
-	calculateHash() {
+	private calculateHash() {
 		return SHA256(this.fromAddress + this.toAddress + this.amount).toString();
 	}
 
 	// Sign the transaction with a private key
-	signTransaction(signingKey: any) {
-		if (signingKey.getPublic("hex") !== this.fromAddress) {
+	public signTransaction(keyPair: elliptic.ec.KeyPair) {
+		if (keyPair.getPublic("hex") !== this.fromAddress) {
 			throw new Error("You cannot sign transactions for other wallets!");
 		}
 
 		const hashTransaction = this.calculateHash();
-		const signature = signingKey.sign(hashTransaction, "base64");
+		const signature = keyPair.sign(hashTransaction, "base64");
 		this.signature = signature.toDER("hex");
 	}
 
 	// Check if the signature is valid
-	isValid() {
+	public isValid() {
 		if (this.fromAddress === null) return true;
 
 		if (!this.signature || this.signature.length === 0) {

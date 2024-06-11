@@ -3,7 +3,7 @@ import { Transaction } from "./transaction";
 
 export class Blockchain {
 	difficulty: number;
-	blockChain: Block[];
+	chain: Block[];
 	pendingTransactions: Transaction[];
 	miningReward: number;
 
@@ -11,21 +11,21 @@ export class Blockchain {
 		this.difficulty = difficulty;
 		this.miningReward = miningReward;
 		this.pendingTransactions = [];
-		this.blockChain = [this.createGenesisBlock()];
+		this.chain = [this.createGenesisBlock()];
 	}
 
 	// Create the Genesis Block
-	createGenesisBlock() {
+	private createGenesisBlock(): Block {
 		return new Block("Genesis Block", "Genesis Block");
 	}
 
 	// Get the latest block in the chain
-	getLatestBlockHash() {
-		return this.blockChain[this.blockChain.length - 1].hash;
+	private getLatestBlockHash(): string {
+		return this.chain[this.chain.length - 1].hash;
 	}
 
 	// Add a new transaction to the pending transactions array
-	addTransaction(transaction: Transaction) {
+	public addTransaction(transaction: Transaction): void {
 		if (!transaction.fromAddress || !transaction.toAddress) {
 			throw new Error("Transaction must include from and to address");
 		}
@@ -38,19 +38,22 @@ export class Blockchain {
 	}
 
 	// Mine the pending transactions
-	minePendingTransactions(miningRewardAddress: string) {
+	public minePendingTransactions(miningRewardAddress: string): void {
+		if (this.pendingTransactions.length === 0) {
+			throw new Error("No pending transactions to mine");
+		}
 		let block = new Block(this.pendingTransactions, this.getLatestBlockHash());
 		block.mineBlock(this.difficulty);
 
-		this.blockChain.push(block);
+		this.chain.push(block);
 
 		this.pendingTransactions = [new Transaction(null, miningRewardAddress, this.miningReward)];
 	}
 
 	// Get the balance of an address (wallet)
-	getBalanceOfAddress(address: string) {
+	public getBalanceOfAddress(address: string): number {
 		let balance = 0;
-		for (const block of this.blockChain) {
+		for (const block of this.chain) {
 			for (const trans of block.transactions) {
 				// Check if the transaction is not the "Genesis Block"
 				if (typeof trans !== "string") {
@@ -67,11 +70,24 @@ export class Blockchain {
 		return balance;
 	}
 
+	public getBalanceToCome(address: string): number {
+		let balance = 0;
+		for (const singleTransaction of this.pendingTransactions) {
+			if (singleTransaction.fromAddress === address) {
+				balance -= singleTransaction.amount;
+			}
+			if (singleTransaction.toAddress === address) {
+				balance += singleTransaction.amount;
+			}
+		}
+		return balance;
+	}
+
 	// Check if the chain is valid
-	isChainValid() {
-		for (let i = 1; i < this.blockChain.length; i++) {
-			const currentBlock = this.blockChain[i];
-			const previousBlock = this.blockChain[i - 1];
+	public isChainValid(): boolean {
+		for (let i = 1; i < this.chain.length; i++) {
+			const currentBlock = this.chain[i];
+			const previousBlock = this.chain[i - 1];
 
 			if (!currentBlock.hasValidTransactions()) {
 				return false;

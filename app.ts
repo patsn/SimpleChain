@@ -1,28 +1,53 @@
 import { Blockchain } from "./chain";
 import { Transaction } from "./transaction";
 import elliptic from "elliptic";
-import { privateKey, publicKey } from "./walletgenerator";
+import { keyPair } from "./walletgenerator";
 
 const EC = elliptic.ec;
 const ec = new EC("secp256k1");
+
+const privateKey = keyPair.getPrivate("hex");
+const publicKey = keyPair.getPublic("hex");
+
+const difficulty: number = 2;
+const miningReward: number = 100;
+
 console.clear();
+console.log("Starting the blockchain...");
 
 // Create a new instance of the Blockchain class
-const difficulty = 2;
-const miningReward = 100;
+console.log("Creating a new instance of the Blockchain class...");
 let simpleChain = new Blockchain(difficulty, miningReward);
 
 // Create a new transaction
+console.log("Creating a new transaction...");
 const myKey = ec.keyFromPrivate(privateKey);
+
 const transaction1 = new Transaction(publicKey, "toAddress", 10);
 transaction1.signTransaction(myKey);
 
-// Add the transaction to the pending transactions array
+const transaction2 = new Transaction(publicKey, "toAddress", 20);
+transaction2.signTransaction(myKey);
+
+// Add the transactions to the pending transactions array
+console.log("Adding the transactions to the pending transactions array...");
 simpleChain.addTransaction(transaction1);
+simpleChain.addTransaction(transaction2);
 
 // Mine the pending transactions
+console.log("Mining the pending transactions...");
 simpleChain.minePendingTransactions("minerAddress");
 
-console.log(simpleChain);
-console.log("Is chain valid? " + simpleChain.isChainValid());
-console.log("My balance: " + simpleChain.getBalanceOfAddress(publicKey));
+console.log("Finished mining the pending transactions...");
+console.log("---------------------------------");
+console.dir(simpleChain, { depth: null });
+console.log("---------------------------------");
+
+const balanceInfo = [
+	{ Address: "publicKey", Balance: simpleChain.getBalanceOfAddress(publicKey) },
+	{ Address: "toAddress", Balance: simpleChain.getBalanceOfAddress("toAddress") },
+	{ Address: "minerAddress", Balance: simpleChain.getBalanceOfAddress("minerAddress") },
+	{ Address: "minerAddress (to come)", Balance: simpleChain.getBalanceToCome("minerAddress") },
+];
+// Display the balance information in a table
+console.table(balanceInfo);
